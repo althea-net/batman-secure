@@ -20,6 +20,7 @@
 
 #include <asm/byteorder.h>
 #include <linux/types.h>
+#include <ed25519.h>
 
 #define batadv_tp_is_error(n) ((u8)(n) > 127 ? 1 : 0)
 
@@ -226,9 +227,8 @@ struct batadv_ogm2_packet {
 	u8     orig[ETH_ALEN];
 	__be16 tvlv_len;
 	__be32 throughput;
-	/* __packed is not needed as the struct size is divisible by 4,
-	 * and the largest data type in this struct has a size of 4.
-	 */
+        ed25519_public_key batadv_public_key; //32 bytes
+        ed25519_signature ogm_ed25519_sig; //64 bytes covers all fields except throughput and ttl
 };
 
 #define BATADV_OGM2_HLEN sizeof(struct batadv_ogm2_packet)
