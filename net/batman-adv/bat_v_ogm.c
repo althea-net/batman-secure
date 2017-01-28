@@ -174,6 +174,13 @@ static void batadv_v_ogm_send(struct work_struct *work)
 	atomic_inc(&bat_priv->bat_v.ogm_seqno);
 	ogm_packet->tvlv_len = htons(tvlv_len);
 
+        //TODO sign packet here
+
+	printk("Sending own OGM2 packet (originator %pM, seqno %u, throughput %u, TTL %d) on interface %s [%pM]\n",
+	   ogm_packet->orig, ntohl(ogm_packet->seqno),
+	   ntohl(ogm_packet->throughput), ogm_packet->ttl,
+	   hard_iface->net_dev->name,
+	   hard_iface->net_dev->dev_addr);
 	/* broadcast on every interface */
 	rcu_read_lock();
 	list_for_each_entry_rcu(hard_iface, &batadv_hardif_list, list) {

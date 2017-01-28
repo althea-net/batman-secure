@@ -20,17 +20,17 @@
 # batman-adv DebugFS entries:
 export CONFIG_BATMAN_ADV_DEBUGFS=y
 # B.A.T.M.A.N. debugging:
-export CONFIG_BATMAN_ADV_DEBUG=n
+export CONFIG_BATMAN_ADV_DEBUG=y
 # B.A.T.M.A.N. bridge loop avoidance:
 export CONFIG_BATMAN_ADV_BLA=y
 # B.A.T.M.A.N. distributed ARP table:
 export CONFIG_BATMAN_ADV_DAT=y
 # B.A.T.M.A.N network coding (catwoman):
-export CONFIG_BATMAN_ADV_NC=n
+export CONFIG_BATMAN_ADV_NC=y
 # B.A.T.M.A.N. multicast optimizations:
 export CONFIG_BATMAN_ADV_MCAST=y
 # B.A.T.M.A.N. V routing algorithm (experimental):
-export CONFIG_BATMAN_ADV_BATMAN_V=n
+export CONFIG_BATMAN_ADV_BATMAN_V=y
 
 PWD:=$(shell pwd)
 BUILD_DIR=$(PWD)/build
@@ -59,6 +59,10 @@ NOSTDINC_FLAGS += \
 	-I$(PWD)/../compat-include/ \
 	-I$(PWD)/../include/ \
 	-include $(PWD)/../compat.h \
+	-I $(PWD)/../ed25519-donna/ \
+        -DED25519_INLINE_ASM \
+        -DED25519_REFHASH \
+        -Wno-unused-function \
 	$(CFLAGS)
 
 ifneq ($(REVISION),)
@@ -68,7 +72,6 @@ endif
 -include $(PWD)/../compat-sources/Makefile
 
 obj-y += net/batman-adv/
-
 export batman-adv-y
 
 
