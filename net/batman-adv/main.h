@@ -195,6 +195,8 @@ enum batadv_uev_type {
 
 #include "packet.h"
 #include "types.h"
+#include "ed25519.h"
+#include <linux/random.h>
 
 struct net_device;
 struct packet_type;
@@ -220,6 +222,8 @@ extern struct list_head batadv_hardif_list;
 extern unsigned char batadv_broadcast_addr[];
 extern struct workqueue_struct *batadv_event_workqueue;
 
+ed25519_public_key* batadv_get_public_key(void);
+ed25519_secret_key* batadv_get_secret_key(void);
 int batadv_mesh_init(struct net_device *soft_iface);
 void batadv_mesh_free(struct net_device *soft_iface);
 bool batadv_is_my_mac(struct batadv_priv *bat_priv, const u8 *addr);
@@ -304,5 +308,8 @@ static inline void batadv_add_counter(struct batadv_priv *bat_priv, size_t idx,
 
 unsigned short batadv_get_vid(struct sk_buff *skb, size_t header_len);
 bool batadv_vlan_ap_isola_get(struct batadv_priv *bat_priv, unsigned short vid);
+
+
+
 
 #endif /* _NET_BATMAN_ADV_MAIN_H_ */

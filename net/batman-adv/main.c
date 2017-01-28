@@ -69,6 +69,9 @@
 #include "tp_meter.h"
 #include "translation-table.h"
 
+//This is an abomination, fix the buld process someday
+#include "ed25519.c"
+
 /* List manipulations on hardif_list have to be rtnl_lock()'ed,
  * list traversals just rcu-locked
  */
@@ -77,6 +80,8 @@ static int (*batadv_rx_handler[256])(struct sk_buff *,
 				     struct batadv_hard_iface *);
 
 unsigned char batadv_broadcast_addr[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+ed25519_secret_key batadv_secret_key;
+ed25519_public_key batadv_public_key;
 
 struct workqueue_struct *batadv_event_workqueue;
 
@@ -89,6 +94,12 @@ static int __init batadv_init(void)
 	ret = batadv_tt_cache_init();
 	if (ret < 0)
 		return ret;
+
+        pr_info("Generating B.A.T.M.A.N. ed25519 private key");
+	get_random_bytes(&batadv_secret_key, sizeof(ed25519_secret_key));
+        pr_info("Generating B.A.T.M.A.N. ed25519 public key");
+	ed25519_publickey(batadv_secret_key, batadv_public_key);
+        pr_info("Private Key %s and Public Key %s", batadv_secret_key, batadv_public_key);
 
 	INIT_LIST_HEAD(&batadv_hardif_list);
 	batadv_algo_init();
@@ -638,6 +649,16 @@ bool batadv_vlan_ap_isola_get(struct batadv_priv *bat_priv, unsigned short vid)
 	}
 
 	return ap_isolation_enabled;
+}
+
+ed25519_public_key* batadv_get_public_key(void)
+{
+	return &batadv_public_key;
+}
+
+ed25519_secret_key* batadv_get_secret_key(void)
+{
+	return &batadv_secret_key;
 }
 
 module_init(batadv_init);
