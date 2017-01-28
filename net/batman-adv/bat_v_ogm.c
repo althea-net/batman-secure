@@ -185,6 +185,11 @@ static void batadv_v_ogm_send(struct work_struct *work)
 	ed25519_sign(message, sig_message_len, *batadv_return_public_key(), *batadv_return_secret_key(), sig);
 	memcpy(ogm_packet->ogm_ed25519_sig, sig, sizeof(ed25519_signature));
 
+	printk("Sending own OGM2 packet (originator %pM, seqno %u, throughput %u, TTL %d) on interface %s [%pM]\n",
+	   ogm_packet->orig, ntohl(ogm_packet->seqno),
+	   ntohl(ogm_packet->throughput), ogm_packet->ttl,
+	   hard_iface->net_dev->name,
+	   hard_iface->net_dev->dev_addr);
 	/* broadcast on every interface */
 	rcu_read_lock();
 	list_for_each_entry_rcu(hard_iface, &batadv_hardif_list, list) {
