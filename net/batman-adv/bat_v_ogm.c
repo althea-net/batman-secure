@@ -50,6 +50,7 @@
 #include "translation-table.h"
 #include "tvlv.h"
 
+
 /**
  * batadv_v_ogm_orig_get - retrieve and possibly create an originator node
  * @bat_priv: the bat priv with all the soft interface information
@@ -141,6 +142,9 @@ static void batadv_v_ogm_send(struct work_struct *work)
 	int ogm_buff_len;
 	u16 tvlv_len = 0;
 	int ret;
+        ed25519_signature sig;
+        u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
+        unsigned char message[sig_message_len];
 
 	bat_v = container_of(work, struct batadv_priv_bat_v, ogm_wq.work);
 	bat_priv = container_of(bat_v, struct batadv_priv, bat_v);
@@ -174,7 +178,13 @@ static void batadv_v_ogm_send(struct work_struct *work)
 	atomic_inc(&bat_priv->bat_v.ogm_seqno);
 	ogm_packet->tvlv_len = htons(tvlv_len);
 
-        //TODO sign packet here
+        //Populate pubkey and begin message generation
+        memcpy(ogm_packet->batadv_public_key, batadv_get_public_key(), sizeof(ed25519_public_key));
+        //sign everything except the sig itself, ttl, throughput, and price
+        build_sig_message(ogm_packet, (unsigned char*)&message, sig_message_len);
+        ed25519_sign(message, sig_message_len, *batadv_get_public_key(), *batadv_get_secret_key(), sig);
+	memcpy(ogm_packet->ogm_ed25519_sig, sig, sizeof(ed25519_signature));
+
 
 	printk("Sending own OGM2 packet (originator %pM, seqno %u, throughput %u, TTL %d) on interface %s [%pM]\n",
 	   ogm_packet->orig, ntohl(ogm_packet->seqno),
@@ -445,6 +455,11 @@ static int batadv_v_ogm_metric_update(struct batadv_priv *bat_priv,
 	if (!orig_ifinfo)
 		goto out;
 
+	if(strcmp(ogm2->batadv_public_key, orig_ifinfo->last_key) && orig_ifinfo->key_init)
+		batadv_dbg(BATADV_DBG_BATMAN, bat_priv,
+			   "Drop packet: OGM from %pM\n has changed keys!",
+			   ogm2->orig);
+
 	seq_diff = ntohl(ogm2->seqno) - orig_ifinfo->last_real_seqno;
 
 	if (!hlist_empty(&orig_node->neigh_list) &&
@@ -473,6 +488,10 @@ static int batadv_v_ogm_metric_update(struct batadv_priv *bat_priv,
 
 	orig_ifinfo->last_real_seqno = ntohl(ogm2->seqno);
 	orig_ifinfo->last_ttl = ogm2->ttl;
+        if(!orig_ifinfo->key_init){
+                memcpy(orig_ifinfo->last_key, ogm2->batadv_public_key, sizeof(ed25519_public_key));
+		orig_ifinfo->key_init = true;
+        }
 
 	neigh_ifinfo = batadv_neigh_ifinfo_new(neigh_node, if_outgoing);
 	if (!neigh_ifinfo)
@@ -685,6 +704,8 @@ static void batadv_v_ogm_process(const struct sk_buff *skb, int ogm_offset,
 	struct batadv_ogm2_packet *ogm_packet;
 	u32 ogm_throughput, link_throughput, path_throughput;
 	int ret;
+        u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
+        unsigned char message[sig_message_len];
 
 	ethhdr = eth_hdr(skb);
 	ogm_packet = (struct batadv_ogm2_packet *)(skb->data + ogm_offset);
@@ -698,6 +719,14 @@ static void batadv_v_ogm_process(const struct sk_buff *skb, int ogm_offset,
 		   ntohl(ogm_packet->seqno), ogm_throughput, ogm_packet->ttl,
 		   ogm_packet->version, ntohs(ogm_packet->tvlv_len));
 
+	//OGM Sig verification TODO batches TODO network byte order is a thing
+        //sign everything except the sig itself, ttl, throughput, and price
+        build_sig_message(ogm_packet, (unsigned char*)&message, sig_message_len);
+        if (!ed25519_sign_open(message, sig_message_len, ogm_packet->batadv_public_key, ogm_packet->ogm_ed25519_sig)){
+		batadv_dbg(BATADV_DBG_BATMAN, bat_priv,
+			   "Drop packet: Failed OGM signiture verification!\n");
+		return;
+	}
 	/* If the troughput metric is 0, immediately drop the packet. No need to
 	 * create orig_node / neigh_node for an unusable route.
 	 */
@@ -868,7 +897,7 @@ free_skb:
 int batadv_v_ogm_init(struct batadv_priv *bat_priv)
 {
 	struct batadv_ogm2_packet *ogm_packet;
-	unsigned char *ogm_buff;
+        char *ogm_buff;
 	u32 random_seqno;
 
 	bat_priv->bat_v.ogm_buff_len = BATADV_OGM2_HLEN;
