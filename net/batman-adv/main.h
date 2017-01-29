@@ -224,6 +224,7 @@ extern struct workqueue_struct *batadv_event_workqueue;
 
 ed25519_public_key* batadv_get_public_key(void);
 ed25519_secret_key* batadv_get_secret_key(void);
+void build_sig_message(struct batadv_ogm2_packet *ogm_packet, unsigned char* message, u16 message_len);
 int batadv_mesh_init(struct net_device *soft_iface);
 void batadv_mesh_free(struct net_device *soft_iface);
 bool batadv_is_my_mac(struct batadv_priv *bat_priv, const u8 *addr);

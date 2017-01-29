@@ -227,6 +227,7 @@ struct batadv_ogm2_packet {
 	u8     orig[ETH_ALEN];
 	__be16 tvlv_len;
 	__be32 throughput;
+        __be32 price;
         ed25519_public_key batadv_public_key; //32 bytes
         ed25519_signature ogm_ed25519_sig; //64 bytes covers all fields except throughput and ttl
 };

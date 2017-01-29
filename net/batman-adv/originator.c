@@ -384,6 +384,7 @@ batadv_orig_ifinfo_new(struct batadv_orig_node *orig_node,
 	reset_time -= msecs_to_jiffies(BATADV_RESET_PROTECTION_MS);
 	orig_ifinfo->batman_seqno_reset = reset_time;
 	orig_ifinfo->if_outgoing = if_outgoing;
+        orig_ifinfo->key_init = false;
 	INIT_HLIST_NODE(&orig_ifinfo->list);
 	kref_init(&orig_ifinfo->refcount);
 
