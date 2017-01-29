@@ -661,6 +661,23 @@ ed25519_secret_key* batadv_get_secret_key(void)
 	return &batadv_secret_key;
 }
 
+//TODO this probably doesn't go in this file
+void build_sig_message(struct batadv_ogm2_packet *ogm_packet, unsigned char* message, u16 message_len)
+{
+	u16 offset = 0;
+	
+        message[offset++] = ogm_packet->packet_type;
+        message[offset++] = ogm_packet->version;
+        message[offset++] = ogm_packet->flags;
+        memcpy(&message[offset], &ogm_packet->seqno, sizeof(ogm_packet->seqno));
+        offset += sizeof(ogm_packet->seqno);
+        memcpy(&message[offset], ogm_packet->orig, ETH_ALEN);
+        offset += ETH_ALEN;
+        memcpy(&message[offset], &ogm_packet->tvlv_len, sizeof(ogm_packet->tvlv_len));
+        offset += sizeof(ogm_packet->tvlv_len);
+        memcpy(&message[offset], batadv_get_public_key(), sizeof(ed25519_public_key));
+}
+
 module_init(batadv_init);
 module_exit(batadv_exit);
 

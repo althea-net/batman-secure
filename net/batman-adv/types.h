@@ -37,6 +37,7 @@
 #include <uapi/linux/batman_adv.h>
 
 #include "packet.h"
+#include "ed25519.h"
 
 struct seq_file;
 
@@ -186,6 +187,8 @@ struct batadv_hard_iface {
  * @batman_seqno_reset: time when the batman seqno window was reset
  * @refcount: number of contexts the object is used
  * @rcu: struct used for freeing in an RCU-safe manner
+ * @last_key: the last seen ed25519 key for this originator
+ * @key_init: used to determine if we have observed a key yet
  */
 struct batadv_orig_ifinfo {
 	struct hlist_node list;
@@ -197,6 +200,8 @@ struct batadv_orig_ifinfo {
 	unsigned long batman_seqno_reset;
 	struct kref refcount;
 	struct rcu_head rcu;
+        ed25519_public_key last_key;
+        bool key_init;
 };
 
 /**
