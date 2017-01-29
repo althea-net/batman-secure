@@ -1,3 +1,14 @@
+BATMAN-ADV-Secure
+-----------------
+
+This is an experimental fork of BATMAN-ADV with the goal of
+providing secure routing and eventually a payment framework
+integrated at a low level. This is highly experimental and
+comes with no warranty express or implied, in it's current
+state it is more likley to crash your machine than run correctly
+
+
+
 BATMAN-ADV
 ----------
 
