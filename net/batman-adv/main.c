@@ -665,7 +665,6 @@ ed25519_secret_key* batadv_return_secret_key(void)
 void build_sig_message(struct batadv_ogm2_packet *ogm_packet, unsigned char* message, u16 message_len)
 {
 	u16 offset = 0;
-
         message[offset++] = ogm_packet->packet_type;
         message[offset++] = ogm_packet->version;
         message[offset++] = ogm_packet->flags;
