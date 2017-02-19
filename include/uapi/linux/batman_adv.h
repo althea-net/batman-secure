@@ -136,6 +136,8 @@ enum batadv_nl_attrs {
 	BATADV_ATTR_BLA_VID,
 	BATADV_ATTR_BLA_BACKBONE,
 	BATADV_ATTR_BLA_CRC,
+        BATADV_ATTR_SECRET_KEY,
+        BATADV_ATTR_PRICE,
 	/* add attributes above here, update the policy in netlink.c */
 	__BATADV_ATTR_AFTER_LAST,
 	NUM_BATADV_ATTR = __BATADV_ATTR_AFTER_LAST,
@@ -175,6 +177,10 @@ enum batadv_nl_commands {
 	BATADV_CMD_GET_GATEWAYS,
 	BATADV_CMD_GET_BLA_CLAIM,
 	BATADV_CMD_GET_BLA_BACKBONE,
+        BATADV_CMD_GET_SECRET_KEY,
+        BATADV_CMD_SET_SECRET_KEY,
+        BATADV_CMD_GET_PRICE,
+        BATADV_CMD_SET_PRICE,
 	/* add new commands above here */
 	__BATADV_CMD_AFTER_LAST,
 	BATADV_CMD_MAX = __BATADV_CMD_AFTER_LAST - 1
