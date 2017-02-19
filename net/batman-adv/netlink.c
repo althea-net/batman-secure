@@ -50,6 +50,7 @@
 #include "soft-interface.h"
 #include "tp_meter.h"
 #include "translation-table.h"
+#include "ed25519.h"
 
 struct genl_family batadv_netlink_family;
 
@@ -96,6 +97,8 @@ static const struct nla_policy batadv_netlink_policy[NUM_BATADV_ATTR] = {
 	[BATADV_ATTR_BLA_VID]		= { .type = NLA_U16 },
 	[BATADV_ATTR_BLA_BACKBONE]	= { .len = ETH_ALEN },
 	[BATADV_ATTR_BLA_CRC]		= { .type = NLA_U16 },
+	[BATADV_ATTR_SECRET_KEY]	= { .type = NLA_NUL_STRING },
+	[BATADV_ATTR_PRICE]		= { .type = NLA_U32 },
 };
 
 /**
@@ -473,6 +476,54 @@ batadv_netlink_dump_hardif_entry(struct sk_buff *msg, u32 portid, u32 seq,
 }
 
 /**
+ * batadv_set_secret_key - Set Secret Key From Userspace
+ *
+ * Return: 0 on success 1 on failure
+ */
+static int
+batadv_set_secret_key(struct sk_buff *msg, struct netlink_callback *cb)
+{
+        //TODO
+	return 1;
+}
+
+/**
+ * batadv_get_secret_key - Get Secret Key From Userspace
+ *
+ * Return: ed25519 key
+ */
+static int
+batadv_get_secret_key(struct sk_buff *msg, struct netlink_callback *cb)
+{
+        //TODO
+	return 1;
+}
+
+/**
+ * batadv_get_price - Get node hop cost from userspace
+ *
+ * Return: 0 on success 1 on error
+ */
+static int
+batadv_get_price(struct sk_buff *msg, struct netlink_callback *cb)
+{
+        //TODO
+	return 1;
+}
+
+/**
+ * batadv_set_price - Set node hop cost from userspace 
+ *
+ * Return: 0 on success 1 on failure
+ */
+static int
+batadv_set_price(struct sk_buff *msg, struct netlink_callback *cb)
+{
+        //TODO
+	return 1;
+}
+
+/**
  * batadv_netlink_dump_hardifs - Dump all hard interface into a messages
  * @msg: Netlink message to dump into
  * @cb: Parameters from query
@@ -602,6 +653,30 @@ static const struct genl_ops batadv_netlink_ops[] = {
 		.flags = GENL_ADMIN_PERM,
 		.policy = batadv_netlink_policy,
 		.dumpit = batadv_bla_backbone_dump,
+	},
+	{
+		.cmd = BATADV_CMD_SET_SECRET_KEY,
+		.flags = GENL_ADMIN_PERM,
+		.policy = batadv_netlink_policy,
+                .dumpit = batadv_set_secret_key,
+	},
+	{
+		.cmd = BATADV_CMD_GET_SECRET_KEY,
+		.flags = GENL_ADMIN_PERM,
+		.policy = batadv_netlink_policy,
+		.dumpit = batadv_get_secret_key,
+	},
+	{
+		.cmd = BATADV_CMD_SET_PRICE,
+		.flags = GENL_ADMIN_PERM,
+		.policy = batadv_netlink_policy,
+		.dumpit = batadv_set_secret_key,
+	},
+	{
+		.cmd = BATADV_CMD_GET_PRICE,
+		.flags = GENL_ADMIN_PERM,
+		.policy = batadv_netlink_policy,
+		.dumpit = batadv_get_secret_key,
 	},
 
 };

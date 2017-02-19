@@ -651,12 +651,12 @@ bool batadv_vlan_ap_isola_get(struct batadv_priv *bat_priv, unsigned short vid)
 	return ap_isolation_enabled;
 }
 
-ed25519_public_key* batadv_get_public_key(void)
+ed25519_public_key* batadv_return_public_key(void)
 {
 	return &batadv_public_key;
 }
 
-ed25519_secret_key* batadv_get_secret_key(void)
+ed25519_secret_key* batadv_return_secret_key(void)
 {
 	return &batadv_secret_key;
 }
@@ -665,7 +665,7 @@ ed25519_secret_key* batadv_get_secret_key(void)
 void build_sig_message(struct batadv_ogm2_packet *ogm_packet, unsigned char* message, u16 message_len)
 {
 	u16 offset = 0;
-	
+
         message[offset++] = ogm_packet->packet_type;
         message[offset++] = ogm_packet->version;
         message[offset++] = ogm_packet->flags;
@@ -675,7 +675,7 @@ void build_sig_message(struct batadv_ogm2_packet *ogm_packet, unsigned char* mes
         offset += ETH_ALEN;
         memcpy(&message[offset], &ogm_packet->tvlv_len, sizeof(ogm_packet->tvlv_len));
         offset += sizeof(ogm_packet->tvlv_len);
-        memcpy(&message[offset], batadv_get_public_key(), sizeof(ed25519_public_key));
+        memcpy(&message[offset], batadv_return_public_key(), sizeof(ed25519_public_key));
 }
 
 module_init(batadv_init);
