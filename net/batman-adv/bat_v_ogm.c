@@ -179,10 +179,10 @@ static void batadv_v_ogm_send(struct work_struct *work)
 	ogm_packet->tvlv_len = htons(tvlv_len);
 
 	//Populate pubkey and begin message generation
-	memcpy(ogm_packet->batadv_public_key, batadv_get_public_key(), sizeof(ed25519_public_key));
+	memcpy(ogm_packet->batadv_public_key, batadv_return_public_key(), sizeof(ed25519_public_key));
 	//sign everything except the sig itself, ttl, throughput, and price
 	build_sig_message(ogm_packet, (unsigned char*)&message, sig_message_len);
-	ed25519_sign(message, sig_message_len, *batadv_get_public_key(), *batadv_get_secret_key(), sig);
+	ed25519_sign(message, sig_message_len, *batadv_return_public_key(), *batadv_return_secret_key(), sig);
 	memcpy(ogm_packet->ogm_ed25519_sig, sig, sizeof(ed25519_signature));
 
 	/* broadcast on every interface */
