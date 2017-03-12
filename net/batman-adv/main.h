@@ -226,7 +226,6 @@ ed25519_public_key* batadv_return_public_key(void);
 ed25519_secret_key* batadv_return_secret_key(void);
 u32 batadv_return_price(void);
 bool  batadv_update_price(u32 price);
-
 void build_sig_message(struct batadv_ogm2_packet *ogm_packet, unsigned char* message, u16 message_len);
 int batadv_mesh_init(struct net_device *soft_iface);
 void batadv_mesh_free(struct net_device *soft_iface);

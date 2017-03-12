@@ -96,8 +96,6 @@ static int __init batadv_init(void)
 	if (ret < 0)
 		return ret;
 
-        // Placeholder until update from userspace
-        batadv_price = 10;
         pr_info("Generating B.A.T.M.A.N. ed25519 private key");
 	get_random_bytes(&batadv_secret_key, sizeof(ed25519_secret_key));
         pr_info("Generating B.A.T.M.A.N. ed25519 public key");
