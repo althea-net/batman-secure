@@ -481,22 +481,75 @@ batadv_netlink_dump_hardif_entry(struct sk_buff *msg, u32 portid, u32 seq,
  * Return: 0 on success 1 on failure
  */
 static int
-batadv_set_secret_key(struct sk_buff *msg, struct netlink_callback *cb)
+batadv_set_secret_key(struct sk_buff *msg, struct genl_info *info)
 {
-        //TODO
-	return 1;
+	int ret = 0;
+        ed25519_secret_key *new_key;
+        ed25519_secret_key *old_key;
+        old_key = batadv_return_secret_key();
+
+	if (!info->attrs[BATADV_ATTR_SECRET_KEY])
+		return -EINVAL;
+
+        new_key = nla_data(info->attrs[BATADV_ATTR_SECRET_KEY]);
+        memcpy(old_key, &new_key, sizeof(ed25519_secret_key));
+	return ret;
 }
 
 /**
  * batadv_get_secret_key - Get Secret Key From Userspace
  *
- * Return: ed25519 key
+ * Return: length of message?
  */
 static int
-batadv_get_secret_key(struct sk_buff *msg, struct netlink_callback *cb)
+batadv_get_secret_key(struct sk_buff *msg, struct genl_info *info)
 {
-        //TODO
-	return 1;
+        const char *key = *batadv_return_secret_key();
+	struct net *net = genl_info_net(info);
+	struct net_device *soft_iface;
+	void *msg_head;
+	int ifindex;
+	int ret;
+
+	if (!info->attrs[BATADV_ATTR_MESH_IFINDEX])
+		return -EINVAL;
+
+	ifindex = nla_get_u32(info->attrs[BATADV_ATTR_MESH_IFINDEX]);
+	if (!ifindex)
+		return -EINVAL;
+
+	soft_iface = dev_get_by_index(net, ifindex);
+	if (!soft_iface || !batadv_softif_is_valid(soft_iface)) {
+		ret = -ENODEV;
+		goto out;
+	}
+
+	msg = nlmsg_new(NLMSG_DEFAULT_SIZE, GFP_KERNEL);
+	if (!msg) {
+		ret = -ENOMEM;
+		goto out;
+	}
+
+	msg_head = genlmsg_put(msg, info->snd_portid, info->snd_seq,
+			       &batadv_netlink_family, 0,
+			       BATADV_CMD_GET_SECRET_KEY);
+	if (!msg_head) {
+		ret = -ENOBUFS;
+		goto out;
+	}
+
+	ret = nla_put_string(msg, BATADV_ATTR_SECRET_KEY, key);
+        return ret;
+
+ out:
+	if (soft_iface)
+		dev_put(soft_iface);
+
+	if (ret) {
+		if (msg)
+			nlmsg_free(msg);
+		return ret;
+	}
 }
 
 /**
@@ -505,22 +558,71 @@ batadv_get_secret_key(struct sk_buff *msg, struct netlink_callback *cb)
  * Return: 0 on success 1 on error
  */
 static int
-batadv_get_price(struct sk_buff *msg, struct netlink_callback *cb)
+batadv_get_price(struct sk_buff *msg,  struct genl_info *info)
 {
-        //TODO
-	return 1;
+	struct net *net = genl_info_net(info);
+	struct net_device *soft_iface;
+	void *msg_head;
+	int ifindex;
+	int ret;
+
+	if (!info->attrs[BATADV_ATTR_MESH_IFINDEX])
+		return -EINVAL;
+
+	ifindex = nla_get_u32(info->attrs[BATADV_ATTR_MESH_IFINDEX]);
+	if (!ifindex)
+		return -EINVAL;
+
+	soft_iface = dev_get_by_index(net, ifindex);
+	if (!soft_iface || !batadv_softif_is_valid(soft_iface)) {
+		ret = -ENODEV;
+		goto out;
+	}
+
+	msg = nlmsg_new(NLMSG_DEFAULT_SIZE, GFP_KERNEL);
+	if (!msg) {
+		ret = -ENOMEM;
+		goto out;
+	}
+
+	msg_head = genlmsg_put(msg, info->snd_portid, info->snd_seq,
+			       &batadv_netlink_family, 0,
+			       BATADV_CMD_GET_PRICE);
+	if (!msg_head) {
+		ret = -ENOBUFS;
+		goto out;
+	}
+
+	ret = nla_put_u32(msg, BATADV_ATTR_PRICE, batadv_return_price());
+        return ret;
+
+ out:
+	if (soft_iface)
+		dev_put(soft_iface);
+
+	if (ret) {
+		if (msg)
+			nlmsg_free(msg);
+		return ret;
+	}
 }
 
 /**
- * batadv_set_price - Set node hop cost from userspace 
+ * batadv_set_price - Set node hop cost from userspace
  *
  * Return: 0 on success 1 on failure
  */
 static int
-batadv_set_price(struct sk_buff *msg, struct netlink_callback *cb)
+batadv_set_price(struct sk_buff *msg, struct genl_info *info)
 {
-        //TODO
-	return 1;
+	int ret = 0;
+        u32 price;
+	if (!info->attrs[BATADV_ATTR_PRICE])
+		return -EINVAL;
+
+        price = nla_get_u32(info->attrs[BATADV_ATTR_PRICE]);
+        batadv_update_price(price);
+	return ret;
 }
 
 /**
@@ -658,25 +760,25 @@ static const struct genl_ops batadv_netlink_ops[] = {
 		.cmd = BATADV_CMD_SET_SECRET_KEY,
 		.flags = GENL_ADMIN_PERM,
 		.policy = batadv_netlink_policy,
-                .dumpit = batadv_set_secret_key,
+                .doit = batadv_set_secret_key,
 	},
 	{
 		.cmd = BATADV_CMD_GET_SECRET_KEY,
 		.flags = GENL_ADMIN_PERM,
 		.policy = batadv_netlink_policy,
-		.dumpit = batadv_get_secret_key,
+		.doit = batadv_get_secret_key,
 	},
 	{
 		.cmd = BATADV_CMD_SET_PRICE,
 		.flags = GENL_ADMIN_PERM,
 		.policy = batadv_netlink_policy,
-		.dumpit = batadv_set_secret_key,
+		.doit = batadv_set_price,
 	},
 	{
 		.cmd = BATADV_CMD_GET_PRICE,
 		.flags = GENL_ADMIN_PERM,
 		.policy = batadv_netlink_policy,
-		.dumpit = batadv_get_secret_key,
+		.doit = batadv_get_price,
 	},
 
 };

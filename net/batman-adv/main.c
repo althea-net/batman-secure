@@ -82,6 +82,7 @@ static int (*batadv_rx_handler[256])(struct sk_buff *,
 unsigned char batadv_broadcast_addr[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 ed25519_secret_key batadv_secret_key;
 ed25519_public_key batadv_public_key;
+u32 batadv_price;
 
 struct workqueue_struct *batadv_event_workqueue;
 
@@ -95,6 +96,8 @@ static int __init batadv_init(void)
 	if (ret < 0)
 		return ret;
 
+        // Placeholder until update from userspace
+        batadv_price = 10;
         pr_info("Generating B.A.T.M.A.N. ed25519 private key");
 	get_random_bytes(&batadv_secret_key, sizeof(ed25519_secret_key));
         pr_info("Generating B.A.T.M.A.N. ed25519 public key");
@@ -659,6 +662,17 @@ ed25519_public_key* batadv_return_public_key(void)
 ed25519_secret_key* batadv_return_secret_key(void)
 {
 	return &batadv_secret_key;
+}
+
+u32 batadv_return_price(void)
+{
+	return batadv_price;
+}
+
+bool batadv_update_price(u32 price)
+{
+	batadv_price = price;
+        return true;
 }
 
 //TODO this probably doesn't go in this file
