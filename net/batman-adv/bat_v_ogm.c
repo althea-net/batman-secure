@@ -142,21 +142,9 @@ static void batadv_v_ogm_send(struct work_struct *work)
 	int ogm_buff_len;
 	u16 tvlv_len = 0;
 	int ret;
-<<<<<<< f06667b6aefc4b43b14a834dbae7ad9bf309bdfe
-<<<<<<< 5b30b2c06148d2553362ef0cfad0e665053fdf58
 	ed25519_signature sig;
 	u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
 	unsigned char message[sig_message_len];
-=======
-        ed25519_signature sig;
-        u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
-        unsigned char message[sig_message_len];
->>>>>>> ogm signing and verification
-=======
-	ed25519_signature sig;
-	u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
-	unsigned char message[sig_message_len];
->>>>>>> fix some spacing
 
 	bat_v = container_of(work, struct batadv_priv_bat_v, ogm_wq.work);
 	bat_priv = container_of(bat_v, struct batadv_priv, bat_v);
@@ -492,24 +480,10 @@ static int batadv_v_ogm_metric_update(struct batadv_priv *bat_priv,
 
 	orig_ifinfo->last_real_seqno = ntohl(ogm2->seqno);
 	orig_ifinfo->last_ttl = ogm2->ttl;
-<<<<<<< f06667b6aefc4b43b14a834dbae7ad9bf309bdfe
-<<<<<<< 5b30b2c06148d2553362ef0cfad0e665053fdf58
 	if(!orig_ifinfo->key_init){
 		memcpy(orig_ifinfo->last_key, ogm2->batadv_public_key, sizeof(ed25519_public_key));
 		orig_ifinfo->key_init = true;
 	}
-=======
-        if(!orig_ifinfo->key_init){
-                memcpy(orig_ifinfo->last_key, ogm2->batadv_public_key, sizeof(ed25519_public_key));
-		orig_ifinfo->key_init = true;
-        }
->>>>>>> ogm signing and verification
-=======
-	if(!orig_ifinfo->key_init){
-		memcpy(orig_ifinfo->last_key, ogm2->batadv_public_key, sizeof(ed25519_public_key));
-		orig_ifinfo->key_init = true;
-	}
->>>>>>> fix some spacing
 
 	neigh_ifinfo = batadv_neigh_ifinfo_new(neigh_node, if_outgoing);
 	if (!neigh_ifinfo)
@@ -722,18 +696,8 @@ static void batadv_v_ogm_process(const struct sk_buff *skb, int ogm_offset,
 	struct batadv_ogm2_packet *ogm_packet;
 	u32 ogm_throughput, link_throughput, path_throughput;
 	int ret;
-<<<<<<< f06667b6aefc4b43b14a834dbae7ad9bf309bdfe
-<<<<<<< 5b30b2c06148d2553362ef0cfad0e665053fdf58
 	u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
 	unsigned char message[sig_message_len];
-=======
-        u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
-        unsigned char message[sig_message_len];
->>>>>>> ogm signing and verification
-=======
-	u16 sig_message_len = sizeof(struct batadv_ogm2_packet) - 73;
-	unsigned char message[sig_message_len];
->>>>>>> fix some spacing
 
 	ethhdr = eth_hdr(skb);
 	ogm_packet = (struct batadv_ogm2_packet *)(skb->data + ogm_offset);
