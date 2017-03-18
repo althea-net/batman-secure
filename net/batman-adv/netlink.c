@@ -504,6 +504,7 @@ batadv_set_secret_key(struct sk_buff *msg, struct genl_info *info)
 static int
 batadv_get_secret_key(struct sk_buff *msg, struct genl_info *info)
 {
+        pr_info("get key function running!");
         const char *key = *batadv_return_secret_key();
 	struct net *net = genl_info_net(info);
 	struct net_device *soft_iface;
