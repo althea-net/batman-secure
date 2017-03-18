@@ -551,6 +551,7 @@ batadv_get_secret_key(struct sk_buff *msg, struct genl_info *info)
 			nlmsg_free(msg);
 		return ret;
 	}
+        return 0;
 }
 
 /**
@@ -606,6 +607,7 @@ batadv_get_price(struct sk_buff *msg,  struct genl_info *info)
 			nlmsg_free(msg);
 		return ret;
 	}
+        return 0;
 }
 
 /**
